@@ -1,6 +1,7 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
   text-decoration: none;
+
 }
 
 form {
@@ -10,16 +11,16 @@ form {
   height: 30px;
 }
 
-button {
+.btn {
   color: #0d0d0e;
   font-weight: bold;
 }
 
-button:hover {
+.btn:hover {
   background-color: rgb(157, 157, 218);
 }
 
-button:active {
+.btn:active {
   background-color: rgb(98, 98, 197);
 }
 
@@ -39,7 +40,7 @@ button:active {
 }
 
 .image-card {
-  flex: 1 1 18%;
+  flex: calc(22% - 100px);
   min-width: 200px;
   text-align: center;
   padding: 10px;
@@ -91,4 +92,26 @@ a {
   100% {
     transform: rotate(360deg);
   }
+}
+
+#loadMoreBtn {
+  width: 100px;
+  height: 30px;
+  background-color: rgb(77, 178, 144);
+  color: rgb(54, 50, 50);
+  font-weight: bolder;
+  font-size: 15px;
+  /* Burada display: inline-block yerine block yapılabilir, daha güvenilir olur */
+  margin: 20px auto;
+  position: relative;
+  cursor: pointer;
+}
+
+.load-more-container {
+  text-align: center;
+  /* Butonu ortalamak için */
+}
+
+.hidden {
+  display: none;
 }

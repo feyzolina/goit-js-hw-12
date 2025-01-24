@@ -15,32 +15,36 @@ const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
 searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
-
   const search = document.querySelector('#search').value;
-  const apiKey = '48254147-b4b10b5266c157a9a3946e15d';
-
   loadingSpinnerDiv.style.display = 'block';
-
   try {
-
+    page = 1;
     const posts = await fetchPosts(search);
-    renderPosts(posts);
-    page += 1;
 
-    if (page > 1) {
-      loadMoreBtn.style.display = 'block';
+    if (posts.length <= 0) {
+      iziToast.error({
+        message: 'Sorry, there are no images matching your search query. Please try again!',
+        position: 'topRight'
+      });
+      loadMoreBtn.classList.add('hidden');  // Butonu gizle
+    } else {
+      renderPosts(posts);
+      page += 1;
+      loadMoreBtn.classList.remove('hidden');  // Butonu göster
+     
     }
+    document.querySelector('#search').value = '';
+
   } catch (error) {
-    iziToast.error({
-      message: 'Sorry, there are no images matching your search query. Please try again!',
-      position: 'topRight'
-    });
+    console.log(error.message);
+    loadMoreBtn.classList.add('hidden');  // Hata durumunda butonu gizle
   } finally {
     loadingSpinnerDiv.style.display = 'none';
   }
 });
 
 async function fetchPosts(search) {
+  const apiKey = '48254147-b4b10b5266c157a9a3946e15d';
   const searchParams = new URLSearchParams({
     q: search,
     image_type: 'photo',
@@ -49,7 +53,7 @@ async function fetchPosts(search) {
     per_page: perPage,
     page: page
   });
-  const url = `https://pixabay.com/api/?key=48254147-b4b10b5266c157a9a3946e15d&${searchParams.toString()}`;
+  const url = `https://pixabay.com/api/?key=${apiKey}&${searchParams.toString()}`;
   const response = await axios.get(url);
   return response.data.hits;
 }
@@ -91,26 +95,21 @@ function renderPosts(images) {
   lightbox.refresh();
 }
 
-
 loadMoreBtn.addEventListener('click', async function () {
   const search = document.querySelector('#search').value;
-  loadMoreBtn.textContent = 'Loading...';
-  try {
+  page += 1;
+  loadingSpinnerDiv.style.display = 'block';
 
+  try {
     const posts = await fetchPosts(search);
     renderPosts(posts);
-    page += 1;
+    loadMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
   } catch (error) {
-    iziToast.error({
-      message: 'Sorry, there are no more images available.',
-      position: 'topRight'
-    });
+    console.log(error.message);
   } finally {
-    loadMoreBtn.textContent = 'Load More';
+    loadingSpinnerDiv.style.display = 'none';
   }
 });
-
-
 
 // const lightbox = new SimpleLightbox('.gallery a', {
 //   captionsData: 'alt',
