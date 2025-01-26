@@ -5,20 +5,30 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import axios from 'axios';
 
-let page = 1;
+let page = 1;  // Sayfa numarasını takip et
 let perPage = 40;
+let loadedPosts = [];  // Yüklenen postları tutacağımız dizi
+let currentSearchTerm = '';  // Şu anki arama terimini tutacağımız değişken
 const searchForm = document.querySelector('#searchForm');
 const galleryDiv = document.querySelector('#gallery');
 const loadingSpinnerDiv = document.querySelector('.loader');
 const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
-
+// Arama formu submit edildiğinde
 searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
   const search = document.querySelector('#search').value.trim();
-  loadingSpinnerDiv.style.display = 'block';
-  try {
+
+  // Eğer yeni bir arama yapılıyorsa, sayfayı sıfırlayalım
+  if (search !== currentSearchTerm) {
+    currentSearchTerm = search;
     page = 1;
+    loadedPosts = [];  // Eski postları temizle
+  }
+
+  loadingSpinnerDiv.style.display = 'block';
+
+  try {
     const posts = await fetchPosts(search);
 
     if (posts.length <= 0) {
@@ -28,13 +38,13 @@ searchForm.addEventListener('submit', async function (event) {
       });
       loadMoreBtn.classList.add('hidden');  // Butonu gizle
     } else {
-      renderPosts(posts);
-       page += 1;
-      loadMoreBtn.classList.remove('hidden');  // Butonu göster
-
+      loadedPosts = posts;  // Yeni postları yüklü postlar olarak kaydediyoruz
+      renderPosts(posts);  // Başlangıçta galeriyi sıfırlayıp yeni fotoğrafları ekle
+      page += 1;  // Sayfa numarasını artır
+      loadMoreBtn.classList.remove('hidden');  // "Load More" butonunu göster
     }
-    document.querySelector('#search').value = '';
 
+    document.querySelector('#search').value = '';  // Arama kutusunu temizle
 
   } catch (error) {
     console.log(error.message);
@@ -44,6 +54,7 @@ searchForm.addEventListener('submit', async function (event) {
   }
 });
 
+// Postları alacak fonksiyon
 async function fetchPosts(search) {
   const apiKey = '48254147-b4b10b5266c157a9a3946e15d';
   const searchParams = new URLSearchParams({
@@ -51,15 +62,15 @@ async function fetchPosts(search) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    _limit: perPage,
-    _page: page
+    per_page: perPage,
+    page: page
   });
   const url = `https://pixabay.com/api/?key=${apiKey}&${searchParams.toString()}`;
   const response = await axios.get(url);
-  return response.data.hits;
+  return response.data.hits;  // API'den gelen resimleri döndür
 }
 
-
+// Postları render edecek fonksiyon
 function renderPosts(images, append = false) {
   const galleryContent = images
     .map(image => {
@@ -89,11 +100,12 @@ function renderPosts(images, append = false) {
     }).join('');
 
   if (append) {
-    galleryDiv.innerHTML += galleryContent;  // Yeni fotoğrafları ekle
+    galleryDiv.innerHTML += galleryContent;  // Yeni fotoğrafları mevcut galerinin sonuna ekle
   } else {
-    galleryDiv.innerHTML = galleryContent;  // Başlangıçta galeriyi sıfırla
+    galleryDiv.innerHTML = galleryContent;  // Başlangıçta galeriyi sıfırla ve yeni fotoğrafları ekle
   }
 
+  // Fotoğraflar açılır pencere ile görüntülenmesi için
   const lightbox = new SimpleLightbox('.gallery a', {
     captionsData: 'alt',
     captionDelay: 250
@@ -101,23 +113,26 @@ function renderPosts(images, append = false) {
   lightbox.refresh();
 }
 
-
+// Load More butonuna tıklandığında
 loadMoreBtn.addEventListener('click', async function (event) {
   event.preventDefault();
-  const search = document.querySelector('#search').value.trim();
   loadingSpinnerDiv.style.display = 'block';
 
   try {
-    const posts = await fetchPosts(search);
+    // Önceki aramanın devamını alıyoruz
+    const posts = await fetchPosts(currentSearchTerm);
 
+    // Mevcut fotoğrafların üzerine yeni fotoğrafları ekle
     renderPosts(posts, true);
-    page +=1;
+
+    page += 1;  // Sayfa numarasını artır
   } catch (error) {
     console.log(error.message);
   } finally {
     loadingSpinnerDiv.style.display = 'none';
   }
 });
+
 
 
 
