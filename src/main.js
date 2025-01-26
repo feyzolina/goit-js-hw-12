@@ -15,7 +15,7 @@ const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
 searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
-  const search = document.querySelector('#search').value;
+  const search = document.querySelector('#search').value.trim();
   loadingSpinnerDiv.style.display = 'block';
   try {
     page = 1;
@@ -29,11 +29,12 @@ searchForm.addEventListener('submit', async function (event) {
       loadMoreBtn.classList.add('hidden');  // Butonu gizle
     } else {
       renderPosts(posts);
-      page += 1;
+       page += 1;
       loadMoreBtn.classList.remove('hidden');  // Butonu göster
-     
+
     }
     document.querySelector('#search').value = '';
+
 
   } catch (error) {
     console.log(error.message);
@@ -50,8 +51,8 @@ async function fetchPosts(search) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    per_page: perPage,
-    page: page
+    _limit: perPage,
+    _page: page
   });
   const url = `https://pixabay.com/api/?key=${apiKey}&${searchParams.toString()}`;
   const response = await axios.get(url);
@@ -59,7 +60,7 @@ async function fetchPosts(search) {
 }
 
 
-function renderPosts(images) {
+function renderPosts(images, append = false) {
   const galleryContent = images
     .map(image => {
       return `
@@ -87,7 +88,12 @@ function renderPosts(images) {
       `;
     }).join('');
 
-  galleryDiv.innerHTML = galleryContent;
+  if (append) {
+    galleryDiv.innerHTML += galleryContent;  // Yeni fotoğrafları ekle
+  } else {
+    galleryDiv.innerHTML = galleryContent;  // Başlangıçta galeriyi sıfırla
+  }
+
   const lightbox = new SimpleLightbox('.gallery a', {
     captionsData: 'alt',
     captionDelay: 250
@@ -95,21 +101,25 @@ function renderPosts(images) {
   lightbox.refresh();
 }
 
-loadMoreBtn.addEventListener('click', async function () {
-  const search = document.querySelector('#search').value;
-  page += 1;
+
+loadMoreBtn.addEventListener('click', async function (event) {
+  event.preventDefault();
+  const search = document.querySelector('#search').value.trim();
   loadingSpinnerDiv.style.display = 'block';
 
   try {
     const posts = await fetchPosts(search);
-    renderPosts(posts);
-    loadMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+    renderPosts(posts, true);
+    page +=1;
   } catch (error) {
     console.log(error.message);
   } finally {
     loadingSpinnerDiv.style.display = 'none';
   }
 });
+
+
 
 // const lightbox = new SimpleLightbox('.gallery a', {
 //   captionsData: 'alt',
