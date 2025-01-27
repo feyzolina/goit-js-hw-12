@@ -14,6 +14,15 @@ const galleryDiv = document.querySelector('.gallery');
 const loadingSpinnerDiv = document.querySelector('.loader');
 const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
+function showLoading() {
+  loadingSpinnerDiv.style.display = 'block';
+  loadMoreBtn.classList.add('hidden');
+}
+
+function hideLoading() {
+  loadingSpinnerDiv.style.display = 'none';
+  loadMoreBtn.classList.remove('hidden');
+}
 
 searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
@@ -24,7 +33,8 @@ searchForm.addEventListener('submit', async function (event) {
     page = 1;
     loadedPosts = [];
   }
-  loadingSpinnerDiv.style.display = 'block';
+
+  showLoading();
 
   try {
     const posts = await fetchPosts(search);
@@ -43,17 +53,15 @@ searchForm.addEventListener('submit', async function (event) {
     }
 
     document.querySelector('#search').value = '';
-
   } catch (error) {
     iziToast.error({
       message: "An error occurred while fetching results. Please try again later.",
       position: 'topRight'
     });
   } finally {
-    loadingSpinnerDiv.style.display = 'none';
+    hideLoading();
   }
 });
-
 
 async function fetchPosts(search) {
   const apiKey = '48254147-b4b10b5266c157a9a3946e15d';
@@ -66,18 +74,40 @@ async function fetchPosts(search) {
     page: page
   });
   const url = `https://pixabay.com/api/?key=${apiKey}&${searchParams.toString()}`;
-  const response = await axios.get(url);
-  const totalHits = response.data.totalHits;
-  const totalPages = Math.ceil(totalHits / perPage);
 
-  if (page >= totalPages) {
-    iziToast.info({
-      message: "We're sorry, but you've reached the end of search results",
-      position: 'topRight'
-    });
-    loadMoreBtn.classList.add('hidden');
+  try {
+    const response = await axios.get(url);
+    const totalHits = response.data.totalHits;
+    const totalPages = Math.ceil(totalHits / perPage);
+
+    if (page >= totalPages) {
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight'
+      });
+      loadMoreBtn.classList.add('hidden');
+    }
+    return response.data.hits;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    if (error.response) {
+      iziToast.error({
+        message: `An error occurred while fetching the data. Status: ${error.response.status}`,
+        position: 'topRight'
+      });
+    } else if (error.request) {
+      iziToast.error({
+        message: 'No response received from the server. Please check your internet connection.',
+        position: 'topRight'
+      });
+    } else {
+      iziToast.error({
+        message: 'An unexpected error occurred. Please try again later.',
+        position: 'topRight'
+      });
+    }
+    throw error;
   }
-  return response.data.hits;
 }
 
 function renderPosts(images, append = false) {
@@ -123,7 +153,7 @@ function renderPosts(images, append = false) {
 
 loadMoreBtn.addEventListener('click', async function (event) {
   event.preventDefault();
-  loadingSpinnerDiv.style.display = 'block';
+  showLoading();
 
   try {
     const posts = await fetchPosts(currentSearchTerm);
@@ -141,11 +171,13 @@ loadMoreBtn.addEventListener('click', async function (event) {
     }
 
   } catch (error) {
-    iziToast.error({
-      message: "We're sorry, but you've reached the end of search results",
-      position: 'topRight'
-    });
+    if (!loadMoreBtn.classList.contains('hidden')) {
+      iziToast.error({
+        message: "An error occurred while loading more images. Please try again later.",
+        position: 'topRight'
+      });
+    }
   } finally {
-    loadingSpinnerDiv.style.display = 'none';
+    hideLoading();
   }
 });
