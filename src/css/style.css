@@ -97,13 +97,17 @@ a {
 #loadMoreBtn {
   width: 100px;
   height: 30px;
-  background-color: rgb(77, 178, 144);
-  color: rgb(54, 50, 50);
+  background-color: rgb(39, 153, 188);
+  color: rgb(71, 64, 64);
   font-weight: bolder;
   font-size: 15px;
   margin: 20px auto;
   position: relative;
   cursor: pointer;
+}
+
+#loadMoreBtn:hover {
+  background-color: rgb(103, 212, 176);
 }
 
 .load-more-container {
