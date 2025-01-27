@@ -14,13 +14,14 @@ const galleryDiv = document.querySelector('#gallery');
 const loadingSpinnerDiv = document.querySelector('.loader');
 const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
+
 searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
   const search = document.querySelector('#search').value.trim();
+
   if (search !== currentSearchTerm) {
     currentSearchTerm = search;
     page = 1;
-    loadedPosts = [];
   }
   loadingSpinnerDiv.style.display = 'block';
 
@@ -63,6 +64,16 @@ async function fetchPosts(search) {
   });
   const url = `https://pixabay.com/api/?key=${apiKey}&${searchParams.toString()}`;
   const response = await axios.get(url);
+  const totalHits = response.data.totalHits;
+  const totalPages = Math.ceil(totalHits / perPage);
+
+  if (page >= totalPages) {
+    iziToast.info({
+      message: "We're sorry, but you've reached the end of search results",
+      position: 'topCenter'
+    });
+    loadMoreBtn.classList.add('hidden');
+  }
   return response.data.hits;
 }
 
