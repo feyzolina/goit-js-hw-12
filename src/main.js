@@ -22,7 +22,7 @@ searchForm.addEventListener('submit', async function (event) {
   if (search !== currentSearchTerm) {
     currentSearchTerm = search;
     page = 1;
-    loadedPosts = []; 
+    loadedPosts = [];
   }
   loadingSpinnerDiv.style.display = 'block';
 
