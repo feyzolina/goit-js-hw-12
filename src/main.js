@@ -22,6 +22,7 @@ searchForm.addEventListener('submit', async function (event) {
   if (search !== currentSearchTerm) {
     currentSearchTerm = search;
     page = 1;
+    loadedPosts = []; 
   }
   loadingSpinnerDiv.style.display = 'block';
 
@@ -44,8 +45,10 @@ searchForm.addEventListener('submit', async function (event) {
     document.querySelector('#search').value = '';
 
   } catch (error) {
-    console.log(error.message);
-    loadMoreBtn.classList.add('hidden');
+    iziToast.error({
+      message: "An error occurred while fetching results. Please try again later.",
+      position: 'topRight'
+    });
   } finally {
     loadingSpinnerDiv.style.display = 'none';
   }
@@ -70,7 +73,7 @@ async function fetchPosts(search) {
   if (page >= totalPages) {
     iziToast.info({
       message: "We're sorry, but you've reached the end of search results",
-      position: 'topCenter'
+      position: 'topRight'
     });
     loadMoreBtn.classList.add('hidden');
   }
@@ -106,7 +109,7 @@ function renderPosts(images, append = false) {
     }).join('');
 
   if (append) {
-    galleryDiv.innerHTML += galleryContent;
+    galleryDiv.insertAdjacentHTML('beforeend', galleryContent);
   } else {
     galleryDiv.innerHTML = galleryContent;
   }
@@ -138,7 +141,10 @@ loadMoreBtn.addEventListener('click', async function (event) {
     }
 
   } catch (error) {
-    console.log(error.message);
+    iziToast.error({
+      message: "We're sorry, but you've reached the end of search results",
+      position: 'topRight'
+    });
   } finally {
     loadingSpinnerDiv.style.display = 'none';
   }
