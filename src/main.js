@@ -10,7 +10,7 @@ let perPage = 40;
 let loadedPosts = [];
 let currentSearchTerm = '';
 const searchForm = document.querySelector('#searchForm');
-const galleryDiv = document.querySelector('#gallery');
+const galleryDiv = document.querySelector('.gallery');
 const loadingSpinnerDiv = document.querySelector('.loader');
 const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
@@ -126,6 +126,17 @@ loadMoreBtn.addEventListener('click', async function (event) {
     const posts = await fetchPosts(currentSearchTerm);
     renderPosts(posts, true);
     page += 1;
+
+    const galleryItems = document.querySelectorAll('.image-card');
+    if (galleryItems.length > 0) {
+      const firstItemHeight = galleryItems[0].getBoundingClientRect().height;
+
+      window.scrollBy({
+        top: firstItemHeight * 2.0,
+        behavior: 'smooth'
+      });
+    }
+
   } catch (error) {
     console.log(error.message);
   } finally {

@@ -27,7 +27,7 @@ form {
 #gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
   margin-top: 20px;
 }
 
@@ -101,7 +101,6 @@ a {
   color: rgb(54, 50, 50);
   font-weight: bolder;
   font-size: 15px;
-  /* Burada display: inline-block yerine block yapılabilir, daha güvenilir olur */
   margin: 20px auto;
   position: relative;
   cursor: pointer;
@@ -109,7 +108,6 @@ a {
 
 .load-more-container {
   text-align: center;
-  /* Butonu ortalamak için */
 }
 
 .hidden {
