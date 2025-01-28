@@ -64,6 +64,7 @@ searchForm.addEventListener('submit', async function (event) {
     if (posts.length <= 0) {
       showErrorMessage('noImages');
       loadMoreBtn.classList.add('hidden');
+      document.querySelector('#search').value = '';
     } else {
       loadedPosts = posts;
       renderPosts(posts);
@@ -98,16 +99,19 @@ async function fetchPosts(search) {
 
     if (totalHits === 0) {
       throw new Error('noImages');
+
     }
 
     if (page >= totalPages) {
       throw new Error('endOfResults');
+
     }
 
     return response.data.hits;
   } catch (error) {
     if (error.message === 'noImages') {
       showErrorMessage('noImages');
+      document.querySelector('#search').value = ''; 
     } else if (error.message === 'endOfResults') {
       showErrorMessage('endOfResults');
     } else {
