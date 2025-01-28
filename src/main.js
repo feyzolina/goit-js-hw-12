@@ -99,23 +99,19 @@ async function fetchPosts(search) {
 
     if (totalHits === 0) {
       throw new Error('noImages');
-
     }
 
-    if (page >= totalPages) {
+    if (page > totalPages) {
       throw new Error('endOfResults');
-
     }
 
     return response.data.hits;
   } catch (error) {
     if (error.message === 'noImages') {
       showErrorMessage('noImages');
-      document.querySelector('#search').value = ''; 
-    } else if (error.message === 'endOfResults') {
+      document.querySelector('#search').value = '';
+    }  else {
       showErrorMessage('endOfResults');
-    } else {
-      showErrorMessage('unexpected');
     }
     throw error;
   }
@@ -184,7 +180,7 @@ loadMoreBtn.addEventListener('click', async function (event) {
 
   } catch (error) {
     if (!loadMoreBtn.classList.contains('hidden')) {
-      showErrorMessage('unexpected');
+      showErrorMessage('endOfResults');
     }
   } finally {
     hideLoading();
