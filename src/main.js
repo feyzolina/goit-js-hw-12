@@ -6,7 +6,7 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import axios from 'axios';
 
 let page = 1;
-let perPage = 40;
+let perPage = 140;
 let loadedPosts = [];
 let currentSearchTerm = '';
 const searchForm = document.querySelector('#searchForm');
@@ -24,6 +24,26 @@ function hideLoading() {
   loadMoreBtn.classList.remove('hidden');
 }
 
+function showErrorMessage(type) {
+  if (type === 'noImages') {
+    iziToast.error({
+      message: 'Sorry, there are no images matching your search query. Please try again!',
+      position: 'topRight'
+    });
+  } else if (type === 'endOfResults') {
+    iziToast.info({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'topRight'
+    });
+  } else {
+    iziToast.error({
+      message: 'An unexpected error occurred. Please try again later.',
+      position: 'topRight'
+    });
+  }
+}
+
+
 searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
   const search = document.querySelector('#search').value.trim();
@@ -40,10 +60,7 @@ searchForm.addEventListener('submit', async function (event) {
     const posts = await fetchPosts(search);
 
     if (posts.length <= 0) {
-      iziToast.error({
-        message: 'Sorry, there are no images matching your search query. Please try again!',
-        position: 'topRight'
-      });
+      showErrorMessage('noImages');
       loadMoreBtn.classList.add('hidden');
     } else {
       loadedPosts = posts;
@@ -54,10 +71,7 @@ searchForm.addEventListener('submit', async function (event) {
 
     document.querySelector('#search').value = '';
   } catch (error) {
-    iziToast.error({
-      message: "An error occurred while fetching results. Please try again later.",
-      position: 'topRight'
-    });
+    console.log(error);
   } finally {
     hideLoading();
   }
@@ -80,35 +94,27 @@ async function fetchPosts(search) {
     const totalHits = response.data.totalHits;
     const totalPages = Math.ceil(totalHits / perPage);
 
-    if (page >= totalPages) {
-      iziToast.info({
-        message: "We're sorry, but you've reached the end of search results.",
-        position: 'topRight'
-      });
-      loadMoreBtn.classList.add('hidden');
+    if (totalHits === 0) {
+      throw new Error('noImages');
     }
+
+    if (page >= totalPages) {
+      throw new Error('endOfResults');
+    }
+
     return response.data.hits;
   } catch (error) {
-    console.error('Fetch error:', error);
-    if (error.response) {
-      iziToast.error({
-        message: `An error occurred while fetching the data. Status: ${error.response.status}`,
-        position: 'topRight'
-      });
-    } else if (error.request) {
-      iziToast.error({
-        message: 'No response received from the server. Please check your internet connection.',
-        position: 'topRight'
-      });
+    if (error.message === 'noImages') {
+      showErrorMessage('noImages');
+    } else if (error.message === 'endOfResults') {
+      showErrorMessage('endOfResults');
     } else {
-      iziToast.error({
-        message: 'An unexpected error occurred. Please try again later.',
-        position: 'topRight'
-      });
+      showErrorMessage('unexpected');
     }
     throw error;
   }
 }
+
 
 function renderPosts(images, append = false) {
   const galleryContent = images
@@ -172,10 +178,7 @@ loadMoreBtn.addEventListener('click', async function (event) {
 
   } catch (error) {
     if (!loadMoreBtn.classList.contains('hidden')) {
-      iziToast.error({
-        message: "An error occurred while loading more images. Please try again later.",
-        position: 'topRight'
-      });
+      showErrorMessage('unexpected');
     }
   } finally {
     hideLoading();
