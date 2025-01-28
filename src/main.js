@@ -15,11 +15,13 @@ const loadingSpinnerDiv = document.querySelector('.loader');
 const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
 function showLoading() {
+  console.log("Yükleme başladı, buton gizleniyor");
   loadingSpinnerDiv.style.display = 'block';
   loadMoreBtn.classList.add('hidden');
 }
 
 function hideLoading() {
+  console.log("Yükleme bitti, buton görünür oluyor");
   loadingSpinnerDiv.style.display = 'none';
   loadMoreBtn.classList.remove('hidden');
 }
@@ -73,7 +75,7 @@ searchForm.addEventListener('submit', async function (event) {
   } catch (error) {
     console.log(error);
   } finally {
-    hideLoading();
+    loadingSpinnerDiv.style.display = 'none';
   }
 });
 
