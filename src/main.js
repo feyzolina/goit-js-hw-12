@@ -6,7 +6,7 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import axios from 'axios';
 
 let page = 1;
-let perPage = 140;
+let perPage = 40;
 let loadedPosts = [];
 let currentSearchTerm = '';
 const searchForm = document.querySelector('#searchForm');
